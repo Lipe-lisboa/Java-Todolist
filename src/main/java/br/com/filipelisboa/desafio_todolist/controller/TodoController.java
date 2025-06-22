@@ -3,9 +3,7 @@ package br.com.filipelisboa.desafio_todolist.controller;
 
 import br.com.filipelisboa.desafio_todolist.entity.Todo;
 import br.com.filipelisboa.desafio_todolist.service.TodoService;
-import org.springframework.web.bind.annotation.Mapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -19,19 +17,23 @@ public class TodoController {
         this.todoService = todoService;
     }
 
+    @GetMapping
     List<Todo> list(){
         return todoService.list();
     }
 
-    List<Todo> create(Todo todo){
+    @PostMapping
+    List<Todo> create(@RequestBody Todo todo){
         return todoService.create(todo);
     }
 
-    List<Todo> update(Todo todo){
+    @PutMapping
+    List<Todo> update(@RequestBody Todo todo){
         return todoService.update(todo);
     }
 
-    List<Todo> delete(long id){
+    @DeleteMapping("{id}")
+    List<Todo> delete(@PathVariable(value = "id") long id){
         return todoService.delete(id);
     }
 }
