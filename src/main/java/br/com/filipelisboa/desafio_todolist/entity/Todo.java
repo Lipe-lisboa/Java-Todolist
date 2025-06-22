@@ -13,7 +13,7 @@ public class Todo {
     private  String name;
     private  String description;
     private  boolean realization;
-    private  int prioridade;
+    private  int priority;
 
     public long getId() {
         return id;
@@ -40,14 +40,18 @@ public class Todo {
     }
 
     public int getPrioridade() {
-        return prioridade;
+        return priority;
     }
 
-    public void setPrioridade(int prioridade) {
-        this.prioridade = prioridade;
+    public void setPrioridade(int priority) {
+        this.priority = priority;
     }
 
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }
