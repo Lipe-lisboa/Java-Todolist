@@ -8,31 +8,41 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/todos")
+@RequestMapping("/todos") //http://localhost:8080/todos
 public class TodoController {
 
+    // Serviço da nossa aplicação
     private TodoService todoService;
 
     public TodoController(TodoService todoService) {
+
         this.todoService = todoService;
     }
 
+    // Expecificando o local de onde irei pegar cada valor
+    // @RequestBody Todo todo
+    // @PathVariable(value = "id")
+
+    // Metodo http da rota é GET
     @GetMapping
     List<Todo> list(){
         return todoService.list();
     }
 
+    // Metodo http da rota é POST
     @PostMapping
     List<Todo> create(@RequestBody Todo todo){
         return todoService.create(todo);
     }
 
+    // Metodo http da rota é PUT (UPDATE)
     @PutMapping
     List<Todo> update(@RequestBody Todo todo){
         return todoService.update(todo);
     }
 
-    @DeleteMapping("{id}")
+    // Metodo http da rota é DELETE
+    @DeleteMapping("{id}") // Pego a variavel da rota http (id)
     List<Todo> delete(@PathVariable(value = "id") long id){
         return todoService.delete(id);
     }

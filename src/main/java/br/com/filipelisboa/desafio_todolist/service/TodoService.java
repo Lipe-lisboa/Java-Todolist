@@ -6,16 +6,20 @@ import br.com.filipelisboa.desafio_todolist.repository.TodoRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.nio.file.LinkOption;
+
 import java.util.List;
 
 @Service
 public class TodoService {
 
+    // repositorio da nossa entidade (tabela Todo)
+    // nome da var -> todoRepository
+    // tipo da var -> TodoRepository
     private TodoRepository todoRepository;
 
 
     public TodoService(TodoRepository todoRepository) {
+
         this.todoRepository = todoRepository;
     }
 
