@@ -2,6 +2,7 @@ package br.com.filipelisboa.desafio_todolist.entity;
 
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 
 
 //No contexto de bancos de dados e mapeamento objeto-relacional (ORM),
@@ -12,18 +13,31 @@ import jakarta.persistence.*;
 @Table(name = "todos")
 public class Todo {
 
+    // campos da tabela
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) //id gerado altomaticamente no bd
     private  long id;
 
-    // campos da tabela
+    @NotBlank
     private  String name;
+
+    @NotBlank
     private  String description;
+
     private  boolean realization;
     private  int priority;
 
+    public Todo(String name, String description, boolean realization, int priority) {
+        this.name = name;
+        this.description = description;
+        this.realization = realization;
+        this.priority = priority;
+    }
 
-    // Getters e Setters
+// Getters e Setters
+
+    // id
     public long getId() {
         return id;
     }
@@ -32,6 +46,7 @@ public class Todo {
         this.id = id;
     }
 
+    //name
     public String getName() {
         return name;
     }
@@ -40,6 +55,8 @@ public class Todo {
         this.name = name;
     }
 
+
+    //description
     public String getDescription() {
         return description;
     }
@@ -48,7 +65,8 @@ public class Todo {
         this.description = description;
     }
 
-    public boolean isRealization() {
+
+    public boolean getRealization() {
         return realization;
     }
 
@@ -56,6 +74,7 @@ public class Todo {
         this.realization = realization;
     }
 
+    // priority
     public int getPriority() {
         return priority;
     }

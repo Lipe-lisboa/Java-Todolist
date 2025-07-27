@@ -3,6 +3,7 @@ package br.com.filipelisboa.desafio_todolist.controller;
 
 import br.com.filipelisboa.desafio_todolist.entity.Todo;
 import br.com.filipelisboa.desafio_todolist.service.TodoService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,13 +32,13 @@ public class TodoController {
 
     // Metodo http da rota é POST
     @PostMapping
-    List<Todo> create(@RequestBody Todo todo){
+    List<Todo> create(@RequestBody @Valid Todo todo){
         return todoService.create(todo);
     }
 
     // Metodo http da rota é PUT (UPDATE)
     @PutMapping
-    List<Todo> update(@RequestBody Todo todo){
+    List<Todo> update(@RequestBody @Valid Todo todo){
         return todoService.update(todo);
     }
 
