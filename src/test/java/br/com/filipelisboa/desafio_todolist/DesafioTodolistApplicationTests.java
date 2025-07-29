@@ -1,6 +1,8 @@
 package br.com.filipelisboa.desafio_todolist;
 
 import br.com.filipelisboa.desafio_todolist.entity.Todo;
+import br.com.filipelisboa.desafio_todolist.repository.TodoRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -40,6 +42,32 @@ class DesafioTodolistApplicationTests {
 
 	@Autowired
 	private WebTestClient webTestClient;
+
+	//repositorio do banco de dados
+	@Autowired
+	private TodoRepository todoRepository;
+
+	// Função para teste da requisição de UPDATE e DELETE
+	private List<Todo> CriarTarefa(Todo tarefa) {
+		return webTestClient
+				.post()
+				.uri("/todos")
+				.bodyValue(tarefa)
+				.exchange()
+				.expectStatus().isOk()
+				.expectBodyList(Todo.class)
+				.returnResult()
+				.getResponseBody();
+	};
+
+
+	@BeforeEach // -> execulta o codigo abaixo antes de todo teste
+	void setup() {
+		// Limpa o banco de dados completamente antes de CADA teste
+		todoRepository.deleteAll(); // Limpa todos os dados da tabela Todo
+
+		}
+
 	@Test
 	void TestCreateTodoSuccess() {
 		var todo = new Todo("todo1", "desc todo1", false, 7);
@@ -53,9 +81,10 @@ class DesafioTodolistApplicationTests {
 				.expectBody()
 				.jsonPath("$").isArray() // espera que retorne um json
 
-				//como estou usando outro bd (h2), esperasse que só tenha uma tarefa no bd
-				//só que como o teste de update esta sendo executado primeiro, tera duas tarefas
-				.jsonPath("$.length()").isEqualTo(2)
+				//como estou usando outro bd (h2), esperasse que só tenha uma tarefa no bd,
+				//só que o teste de update esta sendo executado primeiro, ou seja,
+				// tera duas tarefas e a tarefa criada nesse teste será a segunda no bd
+				.jsonPath("$.length()").isEqualTo(1)
 
 				//expectativa dos dados recebidos
 				.jsonPath("$[0].name").isEqualTo(todo.getName())
@@ -80,19 +109,10 @@ class DesafioTodolistApplicationTests {
 	@Test
 	void TesteUpdateSuccess(){
 
-		var todo = new Todo("todo1", "desc todo1", false, 7);
+		var todo = new Todo("todo2", "desc todo2", false, 3);
 
 		//Criando uma tarefa
-		List<Todo> tarefaCriada = webTestClient
-				.post()
-				.uri("/todos")
-				.bodyValue(todo)
-				.exchange()
-				.expectStatus().isOk()
-				.expectBodyList(Todo.class)
-				.returnResult()
-				.getResponseBody();
-
+		List<Todo> tarefaCriada = CriarTarefa(todo);
 
 
 		// verificando se a tarefa é nula ou esta vazia
@@ -100,11 +120,13 @@ class DesafioTodolistApplicationTests {
 			throw new AssertionError("A requisição POST não retornou nenhuma tarefa.");
 		}
 
+		// pegando o valor do id criado
 		long idTarefaCriada = tarefaCriada.get(0).getId();
 
-		var tarefaAtualizada = new Todo("tarefa2", "desc todo2", true, 1);
+		var tarefaAtualizada = new Todo("todo2", "desc todo2", true, 3);
 
 
+		// colocando o id da tarefa criada na tarefa atualizada
 		tarefaAtualizada.setId(idTarefaCriada);
 
 		webTestClient
@@ -123,5 +145,87 @@ class DesafioTodolistApplicationTests {
 				.jsonPath("$[0].description").isEqualTo(tarefaAtualizada.getDescription())
 				.jsonPath("$[0].realization").isEqualTo(tarefaAtualizada.getRealization())
 				.jsonPath("$[0].priority").isEqualTo(tarefaAtualizada.getPriority());
+	}
+
+	//Crinado Tarefa com id não existente
+	@Test
+	void TestUpdateIdNotExist() {
+		// id não existente no banco de dados
+		Long nonExistentId = 999999999L;
+
+		var tarefaAtualizada = new Todo("todo3", "desc todo3", true, 3);
+
+
+		tarefaAtualizada.setId(nonExistentId);
+
+		webTestClient
+				.put()
+				.uri("/todos")
+				.bodyValue(tarefaAtualizada)
+				.exchange()
+				.expectStatus().is5xxServerError();
+	}
+
+	@Test
+	void TestUpdateFail(){
+		var todo = new Todo("todo4", "desc todo4", false, 3);
+
+		//Criando uma tarefa
+		List<Todo> tarefaCriada = CriarTarefa(todo);
+
+
+		// verificando se a tarefa é nula ou esta vazia
+		if (tarefaCriada == null || tarefaCriada.isEmpty()){
+			throw new AssertionError("A requisição POST não retornou nenhuma tarefa.");
+		}
+
+		// pegando o valor do id criado
+		long idTarefaCriada = tarefaCriada.get(0).getId();
+
+		var tarefaAtualizada = new Todo("", "", true, 3);
+
+		tarefaAtualizada.setId(idTarefaCriada);
+
+		webTestClient
+				.put()
+				.uri("/todos")
+				.bodyValue(tarefaAtualizada)
+				.exchange()
+				.expectStatus().isBadRequest();
+	}
+
+	@Test
+	void TestDeleteSuccess(){
+		var todo = new Todo("todo5", "desc todo5", false, 3);
+
+		//Criando uma tarefa
+		List<Todo> tarefaCriada = CriarTarefa(todo);
+
+
+		// verificando se a tarefa é nula ou esta vazia
+		if (tarefaCriada == null || tarefaCriada.isEmpty()){
+			throw new AssertionError("A requisição POST não retornou nenhuma tarefa.");
+		}
+
+		webTestClient
+				.delete()
+				.uri("/todos/{id}", tarefaCriada.get(0).getId())
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody()
+				.jsonPath("$.length()").isEqualTo(0);
+
+	}
+
+	@Test
+	void TestDeleteIdNotExist(){
+
+		long idNotExist = 99999999L;
+
+		webTestClient
+				.delete()
+				.uri("/todos{id}", idNotExist)
+				.exchange()
+				.expectStatus().isNotFound();
 	}
 }

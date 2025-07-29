@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 public class TodoService {
@@ -46,9 +47,13 @@ public class TodoService {
     }
 
     public List<Todo> delete(Long id){
-        todoRepository.deleteById(id);
 
-        return list();
+        if (todoRepository.existsById(id)) {
+            todoRepository.deleteById(id);
+            return list();
+        }else { // Captura sua exceção customizada se o Todo não for encontrado
+            throw new NoSuchElementException("Todo não encontrado com ID: " + id); // Lança NoSuchElementException
+        }
     }
 
 
