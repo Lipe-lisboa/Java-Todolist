@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
+import java.util.List;
+
 //A classe DesafioTodolistApplicationTests é uma classe de teste. Ela serve para verificar
 // se as funcionalidades da sua aplicação estão funcionando corretamente em um ambiente próximo ao real.
 //Nesse caso específico, o objetivo é testar a criação de um "Todo" (item de lista de tarefas).
@@ -34,6 +36,8 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class DesafioTodolistApplicationTests {
 
+	// Os testes nem sempre são executados na sequencia
+
 	@Autowired
 	private WebTestClient webTestClient;
 	@Test
@@ -50,7 +54,8 @@ class DesafioTodolistApplicationTests {
 				.jsonPath("$").isArray() // espera que retorne um json
 
 				//como estou usando outro bd (h2), esperasse que só tenha uma tarefa no bd
-				.jsonPath("$.length()").isEqualTo(1)
+				//só que como o teste de update esta sendo executado primeiro, tera duas tarefas
+				.jsonPath("$.length()").isEqualTo(2)
 
 				//expectativa dos dados recebidos
 				.jsonPath("$[0].name").isEqualTo(todo.getName())
@@ -70,5 +75,53 @@ class DesafioTodolistApplicationTests {
 				)
 				.exchange()
 				.expectStatus().isBadRequest();
+	}
+
+	@Test
+	void TesteUpdateSuccess(){
+
+		var todo = new Todo("todo1", "desc todo1", false, 7);
+
+		//Criando uma tarefa
+		List<Todo> tarefaCriada = webTestClient
+				.post()
+				.uri("/todos")
+				.bodyValue(todo)
+				.exchange()
+				.expectStatus().isOk()
+				.expectBodyList(Todo.class)
+				.returnResult()
+				.getResponseBody();
+
+
+
+		// verificando se a tarefa é nula ou esta vazia
+		if (tarefaCriada == null || tarefaCriada.isEmpty()){
+			throw new AssertionError("A requisição POST não retornou nenhuma tarefa.");
+		}
+
+		long idTarefaCriada = tarefaCriada.get(0).getId();
+
+		var tarefaAtualizada = new Todo("tarefa2", "desc todo2", true, 1);
+
+
+		tarefaAtualizada.setId(idTarefaCriada);
+
+		webTestClient
+				.put()
+				.uri("/todos")
+				.bodyValue(tarefaAtualizada)
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody()
+				.jsonPath("$").isArray() // espera que retorne um json
+				//como estou usando outro bd (h2), esperasse que só tenha uma tarefa no bd
+				.jsonPath("$.length()").isEqualTo(1)
+				//expectativa dos dados recebidos
+				.jsonPath("$[0].id").isEqualTo(tarefaAtualizada.getId())
+				.jsonPath("$[0].name").isEqualTo(tarefaAtualizada.getName())
+				.jsonPath("$[0].description").isEqualTo(tarefaAtualizada.getDescription())
+				.jsonPath("$[0].realization").isEqualTo(tarefaAtualizada.getRealization())
+				.jsonPath("$[0].priority").isEqualTo(tarefaAtualizada.getPriority());
 	}
 }

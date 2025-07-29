@@ -28,6 +28,8 @@ public class Todo {
     private  boolean realization;
     private  int priority;
 
+    public  Todo(){}
+
     public Todo(String name, String description, boolean realization, int priority) {
         this.name = name;
         this.description = description;
