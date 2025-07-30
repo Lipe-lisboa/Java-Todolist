@@ -19,3 +19,14 @@
         <scope>test</scope>
     </dependency>**
 
+
+## swagger
+Contratos de API (controladores, endpoints), e gera uma interface para visualizar tudo isso
+##
+    <dependency>
+        <groupId>org.springdoc</groupId>
+        <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+        <version>2.6.0</version>
+    </dependency>
+
+http://localhost:8080/swagger-ui/index.html
